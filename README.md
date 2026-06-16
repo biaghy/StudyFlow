@@ -48,16 +48,16 @@ Roadmap:
 ## Screenshots
 
 Dashboard:
-![](Studyflow/assets/screenshots/dashboard.jpg)
+![](assets/screenshots/dashboard.jpg)
 
 Tasks:
-![](Studyflow/assets/screenshots/tasks.jpg)
+![](assets/screenshots/tasks.jpg)
 
 Habit Tracker:
-![](Studyflow/assets/sreenshots/habits.jpg)
+![](assets/sreenshots/habits.jpg)
 
 Goal Tracker:
-![](Studyflow/assets/screenshots/goals.jpg)
+![](assets/screenshots/goals.jpg)
 
 
 
