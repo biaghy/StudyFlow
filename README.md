@@ -78,6 +78,12 @@ Goal Tracker:
 
 
 
+Reflections:
+![](assets/screenshots/reflections.jpg)
+
+
+
+
 
 Author:
 
