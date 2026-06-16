@@ -45,8 +45,20 @@ Roadmap:
 
 Screenshots
 
-Screenshots will be added in future releases.
 
-Author
+## Screenshots
+
+| Dashboard | Tasks |
+|-----------|--------|
+| ![](assets/screenshots/dashboard.png) | ![](assets/screenshots/tasks.png) |
+
+| Habit Tracker | Goal Tracker |
+|--------------|--------------|
+| ![](assets/sreenshots/habits.png) | ![](assets/screenshots/goals.png) |
+
+
+
+
+Author:
 
 Developed by Biaghy.
