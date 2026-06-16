@@ -22,17 +22,25 @@ Features:
   - Self-evaluation
   - Gratitude journal
 
+
+
 Technology:
 - HTML
 - CSS
 - JavaScript
 - LocalStorage
 
+
+
 Current Status:
 
 StudyFlow is currently in active development.
 
+
+
 Version: v1.0
+
+
 
 Roadmap:
 
@@ -45,19 +53,29 @@ Roadmap:
 
 
 
+
+
 ## Screenshots
 
 Dashboard:
 ![](assets/screenshots/dashboard.jpg)
 
+
+
 Tasks:
 ![](assets/screenshots/tasks.jpg)
+
+
 
 Habit Tracker:
 ![](assets/screenshots/habits.jpg)
 
+
+
 Goal Tracker:
 ![](assets/screenshots/goals.jpg)
+
+
 
 
 
