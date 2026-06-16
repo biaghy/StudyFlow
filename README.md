@@ -50,11 +50,11 @@ Screenshots
 
 | Dashboard | Tasks |
 |-----------|--------|
-| ![](assets/screenshots/dashboard.png) | ![](assets/screenshots/tasks.png) |
+| ![](Studyflow/assets/screenshots/dashboard.png) | ![](Studyflow/assets/screenshots/tasks.png) |
 
 | Habit Tracker | Goal Tracker |
 |--------------|--------------|
-| ![](assets/sreenshots/habits.png) | ![](assets/screenshots/goals.png) |
+| ![](Studyflow/assets/sreenshots/habits.png) | ![](Studyflow/assets/screenshots/goals.png) |
 
 
 
