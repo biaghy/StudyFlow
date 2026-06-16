@@ -48,17 +48,21 @@ Screenshots
 
 ## Screenshots
 
-| Dashboard | Tasks |
-|-----------|--------|
-| ![](Studyflow/assets/screenshots/dashboard.png) | ![](Studyflow/assets/screenshots/tasks.png) |
+Dashboard:
+![](Studyflow/assets/screenshots/dashboard.png)
 
-| Habit Tracker | Goal Tracker |
-|--------------|--------------|
-| ![](Studyflow/assets/sreenshots/habits.png) | ![](Studyflow/assets/screenshots/goals.png) |
+Tasks:
+![](Studyflow/assets/screenshots/tasks.png)
+
+Habit Tracker:
+![](Studyflow/assets/sreenshots/habits.png)
+
+Goal Tracker:
+![](Studyflow/assets/screenshots/goals.png)
 
 
 
 
-Author:
+Autho
 
 Developed by Biaghy.
