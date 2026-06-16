@@ -43,26 +43,24 @@ Roadmap:
 - [ ] Cloud synchronization
 - [ ] Mobile app version
 
-Screenshots
 
 
 ## Screenshots
 
 Dashboard:
-![](Studyflow/assets/screenshots/dashboard.png)
+![](Studyflow/assets/screenshots/dashboard.jpg)
 
 Tasks:
-![](Studyflow/assets/screenshots/tasks.png)
+![](Studyflow/assets/screenshots/tasks.jpg)
 
 Habit Tracker:
-![](Studyflow/assets/sreenshots/habits.png)
+![](Studyflow/assets/sreenshots/habits.jpg)
 
 Goal Tracker:
-![](Studyflow/assets/screenshots/goals.png)
+![](Studyflow/assets/screenshots/goals.jpg)
 
 
 
-
-Autho
+Author:
 
 Developed by Biaghy.
