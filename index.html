@@ -1,0 +1,2122 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>StudyFlow — Organizer Pelajar</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d0f14;
+    --surface: #161920;
+    --surface2: #1e2230;
+    --surface3: #252a3a;
+    --border: #2e3348;
+    --accent: #f0c040;
+    --accent2: #4fe3b0;
+    --accent3: #e05a7a;
+    --accent4: #7b8fff;
+    --text: #e8ecf4;
+    --text2: #8b91a8;
+    --text3: #5a6080;
+    --radius: 14px;
+    --radius-sm: 8px;
+    --font-head: 'Syne', sans-serif;
+    --font-body: 'DM Sans', sans-serif;
+    --transition: 0.2s cubic-bezier(.4,0,.2,1);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-body);
+    font-size: 15px;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── Layout ── */
+  .app { display: flex; min-height: 100vh; }
+
+  /* ── Sidebar ── */
+  .sidebar {
+    width: 230px;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    padding: 24px 16px;
+    gap: 6px;
+    position: fixed;
+    top: 0; left: 0; bottom: 0;
+    z-index: 100;
+    transition: transform var(--transition);
+  }
+
+  .sidebar-logo {
+    font-family: var(--font-head);
+    font-size: 22px;
+    font-weight: 800;
+    color: var(--accent);
+    letter-spacing: -0.5px;
+    padding: 0 8px 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .sidebar-logo span { color: var(--text); }
+
+  .nav-label {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--text3);
+    padding: 8px 10px 4px;
+    margin-top: 8px;
+  }
+
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 12px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    color: var(--text2);
+    font-weight: 500;
+    transition: all var(--transition);
+    border: 1px solid transparent;
+    user-select: none;
+  }
+  .nav-item:hover { background: var(--surface2); color: var(--text); }
+  .nav-item.active {
+    background: var(--surface3);
+    color: var(--accent);
+    border-color: var(--border);
+  }
+  .nav-item .icon { font-size: 18px; width: 22px; text-align: center; }
+
+  .sidebar-footer {
+    margin-top: auto;
+    padding-top: 16px;
+    border-top: 1px solid var(--border);
+  }
+  .greeting {
+    font-size: 12px;
+    color: var(--text3);
+    padding: 8px 10px 4px;
+  }
+  .greeting strong { color: var(--text2); }
+
+  /* ── Main Content ── */
+  .main {
+    margin-left: 230px;
+    flex: 1;
+    padding: 32px;
+    min-height: 100vh;
+  }
+
+  /* ── Page ── */
+  .page { display: none; animation: fadeIn 0.3s ease; }
+  .page.active { display: block; }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── Page Header ── */
+  .page-header {
+    margin-bottom: 28px;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .page-title {
+    font-family: var(--font-head);
+    font-size: 28px;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+  }
+  .page-subtitle { color: var(--text2); font-size: 14px; margin-top: 4px; }
+
+  /* ── Cards ── */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+  }
+  .card-title {
+    font-family: var(--font-head);
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+    margin-bottom: 16px;
+    color: var(--text2);
+    text-transform: uppercase;
+    font-size: 11px;
+    letter-spacing: 1px;
+  }
+
+  /* ── Grid Layouts ── */
+  .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+  .grid-auto { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
+
+  /* ── Stat Cards ── */
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    position: relative;
+    overflow: hidden;
+  }
+  .stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+  }
+  .stat-card.yellow::before { background: var(--accent); }
+  .stat-card.green::before { background: var(--accent2); }
+  .stat-card.pink::before { background: var(--accent3); }
+  .stat-card.blue::before { background: var(--accent4); }
+
+  .stat-label { font-size: 12px; color: var(--text3); font-weight: 500; letter-spacing: 0.5px; }
+  .stat-value {
+    font-family: var(--font-head);
+    font-size: 36px;
+    font-weight: 800;
+    line-height: 1.1;
+    margin: 6px 0 2px;
+  }
+  .stat-card.yellow .stat-value { color: var(--accent); }
+  .stat-card.green .stat-value { color: var(--accent2); }
+  .stat-card.pink .stat-value { color: var(--accent3); }
+  .stat-card.blue .stat-value { color: var(--accent4); }
+  .stat-sub { font-size: 12px; color: var(--text3); }
+
+  /* ── Buttons ── */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 9px 16px;
+    border-radius: var(--radius-sm);
+    font-family: var(--font-body);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    border: none;
+    transition: all var(--transition);
+    text-decoration: none;
+  }
+  .btn-primary { background: var(--accent); color: #0d0f14; }
+  .btn-primary:hover { background: #f8d060; transform: translateY(-1px); }
+  .btn-ghost { background: transparent; color: var(--text2); border: 1px solid var(--border); }
+  .btn-ghost:hover { background: var(--surface2); color: var(--text); }
+  .btn-danger { background: transparent; color: var(--accent3); border: 1px solid transparent; }
+  .btn-danger:hover { background: rgba(224,90,122,0.1); }
+  .btn-sm { padding: 6px 12px; font-size: 12px; }
+  .btn-icon { padding: 8px; border-radius: var(--radius-sm); background: var(--surface2); border: 1px solid var(--border); color: var(--text2); cursor: pointer; font-size: 16px; transition: all var(--transition); }
+  .btn-icon:hover { color: var(--text); background: var(--surface3); }
+
+  /* ── Task Items ── */
+  .task-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 14px;
+    background: var(--surface2);
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+    margin-bottom: 8px;
+    transition: all var(--transition);
+    cursor: pointer;
+  }
+  .task-item:hover { border-color: var(--surface3); background: var(--surface3); }
+  .task-item.done { opacity: 0.5; }
+  .task-item.done .task-name { text-decoration: line-through; }
+
+  .task-check {
+    width: 20px; height: 20px;
+    border: 2px solid var(--border);
+    border-radius: 50%;
+    flex-shrink: 0;
+    margin-top: 1px;
+    transition: all var(--transition);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px;
+    cursor: pointer;
+  }
+  .task-check.checked { border-color: var(--accent2); background: var(--accent2); color: #0d0f14; }
+
+  .task-name { font-size: 14px; font-weight: 500; }
+  .task-meta { display: flex; gap: 8px; align-items: center; margin-top: 4px; flex-wrap: wrap; }
+  .badge {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+    padding: 2px 8px;
+    border-radius: 20px;
+    text-transform: uppercase;
+  }
+  .badge-yellow { background: rgba(240,192,64,0.15); color: var(--accent); }
+  .badge-green { background: rgba(79,227,176,0.15); color: var(--accent2); }
+  .badge-red { background: rgba(224,90,122,0.15); color: var(--accent3); }
+  .badge-blue { background: rgba(123,143,255,0.15); color: var(--accent4); }
+  .badge-gray { background: var(--surface3); color: var(--text3); }
+
+  .task-deadline { font-size: 11px; color: var(--text3); }
+  .task-deadline.urgent { color: var(--accent3); }
+
+  .task-actions { margin-left: auto; display: flex; gap: 4px; opacity: 0; transition: opacity var(--transition); }
+  .task-item:hover .task-actions { opacity: 1; }
+
+  /* ── Progress Bar ── */
+  .progress-wrap { margin-top: 8px; }
+  .progress-bar {
+    height: 6px;
+    background: var(--surface3);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    border-radius: 3px;
+    background: var(--accent2);
+    transition: width 0.6s cubic-bezier(.4,0,.2,1);
+  }
+  .progress-label { display: flex; justify-content: space-between; font-size: 11px; color: var(--text3); margin-bottom: 4px; }
+
+  /* ── Input ── */
+  input, textarea, select {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    color: var(--text);
+    font-family: var(--font-body);
+    font-size: 14px;
+    padding: 10px 14px;
+    width: 100%;
+    outline: none;
+    transition: border-color var(--transition);
+  }
+  input:focus, textarea:focus, select:focus { border-color: var(--accent); }
+  textarea { resize: vertical; min-height: 80px; }
+  select option { background: var(--surface2); }
+
+  .input-group { display: flex; gap: 8px; }
+  .input-group input { flex: 1; }
+
+  /* ── Form Grid ── */
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .form-grid.three { grid-template-columns: 1fr 1fr 1fr; }
+  .form-label { font-size: 11px; color: var(--text3); font-weight: 600; letter-spacing: 0.5px; text-transform: uppercase; margin-bottom: 5px; }
+  .form-field { display: flex; flex-direction: column; }
+  .form-full { grid-column: 1 / -1; }
+
+  /* ── Habit Tracker ── */
+  .habit-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px;
+    background: var(--surface2);
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+    margin-bottom: 8px;
+    transition: all var(--transition);
+  }
+  .habit-icon { font-size: 20px; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; background: var(--surface3); border-radius: 8px; flex-shrink: 0; }
+  .habit-info { flex: 1; }
+  .habit-name { font-size: 14px; font-weight: 500; }
+  .habit-streak { font-size: 11px; color: var(--text3); margin-top: 2px; }
+  .habit-streak span { color: var(--accent); font-weight: 700; }
+
+  .habit-days { display: flex; gap: 4px; }
+  .day-dot {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 10px; font-weight: 700;
+    cursor: pointer;
+    transition: all var(--transition);
+    border: 2px solid var(--border);
+    color: var(--text3);
+    user-select: none;
+  }
+  .day-dot.done { background: var(--accent2); border-color: var(--accent2); color: #0d0f14; }
+  .day-dot.today { border-color: var(--accent); color: var(--accent); }
+  .day-dot.today.done { background: var(--accent); border-color: var(--accent); color: #0d0f14; }
+
+  /* ── Goal Tracker ── */
+  .goal-item {
+    padding: 18px;
+    background: var(--surface2);
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+    margin-bottom: 10px;
+    transition: border-color var(--transition);
+  }
+  .goal-item:hover { border-color: var(--surface3); }
+  .goal-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
+  .goal-title { font-size: 15px; font-weight: 600; }
+  .goal-percent {
+    font-family: var(--font-head);
+    font-size: 22px;
+    font-weight: 800;
+    color: var(--accent2);
+  }
+  .goal-desc { font-size: 12px; color: var(--text3); margin-bottom: 10px; }
+  .goal-progress .progress-fill { background: var(--accent4); }
+
+  /* ── Reflection ── */
+  .reflection-date {
+    font-family: var(--font-head);
+    font-size: 32px;
+    font-weight: 800;
+    letter-spacing: -1px;
+    color: var(--accent);
+  }
+  .reflection-item {
+    padding: 16px;
+    background: var(--surface2);
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+    margin-bottom: 10px;
+  }
+  .reflection-item-date { font-size: 11px; color: var(--text3); margin-bottom: 8px; }
+  .reflection-item-text { font-size: 14px; line-height: 1.6; color: var(--text2); white-space: pre-wrap; }
+  .mood-picker { display: flex; gap: 8px; flex-wrap: wrap; }
+  .mood-opt {
+    padding: 8px 14px;
+    border-radius: 20px;
+    border: 2px solid var(--border);
+    background: var(--surface2);
+    cursor: pointer;
+    font-size: 13px;
+    transition: all var(--transition);
+    user-select: none;
+  }
+  .mood-opt.selected, .mood-opt:hover { border-color: var(--accent); background: rgba(240,192,64,0.1); }
+
+  .score-picker { display: flex; gap: 6px; }
+  .score-btn {
+    width: 36px; height: 36px;
+    border-radius: var(--radius-sm);
+    border: 2px solid var(--border);
+    background: var(--surface2);
+    color: var(--text2);
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all var(--transition);
+  }
+  .score-btn.selected { border-color: var(--accent); background: var(--accent); color: #0d0f14; }
+  .score-btn:hover:not(.selected) { border-color: var(--accent); color: var(--accent); }
+
+  /* ── Modal ── */
+  .modal-overlay {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.7);
+    backdrop-filter: blur(4px);
+    z-index: 200;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px;
+    width: 100%;
+    max-width: 480px;
+    max-height: 90vh;
+    overflow-y: auto;
+    animation: slideUp 0.25s cubic-bezier(.4,0,.2,1);
+  }
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(20px) scale(0.98); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+  }
+  .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+  .modal-title { font-family: var(--font-head); font-size: 20px; font-weight: 800; }
+  .modal-close { background: none; border: none; color: var(--text3); font-size: 22px; cursor: pointer; transition: color var(--transition); line-height: 1; }
+  .modal-close:hover { color: var(--text); }
+  .modal-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 20px; }
+
+  /* ── Mobile Topbar ── */
+  .topbar {
+    display: none;
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 12px 16px;
+    z-index: 99;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .topbar-logo { font-family: var(--font-head); font-size: 18px; font-weight: 800; color: var(--accent); }
+  .topbar-logo span { color: var(--text); }
+  .hamburger { background: none; border: none; color: var(--text); font-size: 22px; cursor: pointer; }
+
+  /* ── Bottom Nav (mobile) ── */
+  .bottom-nav {
+    display: none;
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    padding: 8px 0 max(8px, env(safe-area-inset-bottom));
+    z-index: 99;
+    justify-content: space-around;
+  }
+  .bnav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    cursor: pointer;
+    padding: 6px 12px;
+    border-radius: var(--radius-sm);
+    color: var(--text3);
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+    text-transform: uppercase;
+    transition: color var(--transition);
+    user-select: none;
+  }
+  .bnav-item .icon { font-size: 20px; }
+  .bnav-item.active { color: var(--accent); }
+
+  /* ── Divider ── */
+  .divider { height: 1px; background: var(--border); margin: 16px 0; }
+
+  /* ── Empty State ── */
+  .empty { text-align: center; padding: 40px 20px; color: var(--text3); }
+  .empty-icon { font-size: 40px; margin-bottom: 12px; }
+  .empty-text { font-size: 14px; line-height: 1.6; }
+
+  /* ── Scrollbar ── */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--surface3); border-radius: 3px; }
+
+  /* ── Overlay for mobile sidebar ── */
+  .sidebar-overlay {
+    display: none;
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 99;
+  }
+  .sidebar-overlay.open { display: block; }
+
+  /* Weekly heatmap */
+  .heatmap-row { display: flex; gap: 6px; align-items: center; margin-bottom: 8px; }
+  .heatmap-label { font-size: 11px; color: var(--text3); width: 80px; flex-shrink: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .heatmap-cells { display: flex; gap: 4px; }
+  .heatmap-cell {
+    width: 24px; height: 24px;
+    border-radius: 4px;
+    background: var(--surface3);
+    transition: background var(--transition);
+    cursor: pointer;
+    position: relative;
+  }
+  .heatmap-cell[data-level="1"] { background: rgba(79,227,176,0.2); }
+  .heatmap-cell[data-level="2"] { background: rgba(79,227,176,0.5); }
+  .heatmap-cell[data-level="3"] { background: rgba(79,227,176,0.8); }
+  .heatmap-cell[data-level="4"] { background: var(--accent2); }
+
+  /* ── Responsive ── */
+  @media (max-width: 900px) {
+    .grid-3 { grid-template-columns: repeat(2, 1fr); }
+    .form-grid.three { grid-template-columns: 1fr 1fr; }
+  }
+
+  @media (max-width: 768px) {
+    .sidebar { transform: translateX(-100%); }
+    .sidebar.open { transform: translateX(0); }
+    .topbar { display: flex; }
+    .bottom-nav { display: flex; }
+    .main {
+      margin-left: 0;
+      padding: 16px;
+      padding-top: 72px;
+      padding-bottom: 80px;
+    }
+    .grid-3 { grid-template-columns: repeat(2, 1fr); }
+    .grid-2 { grid-template-columns: 1fr; }
+    .habit-days { display: none; }
+    .form-grid { grid-template-columns: 1fr; }
+    .form-grid.three { grid-template-columns: 1fr; }
+    .page-header { flex-direction: column; }
+  }
+
+  @media (max-width: 480px) {
+    .grid-3 { grid-template-columns: 1fr; }
+    .stat-value { font-size: 28px; }
+  }
+
+  /* ── Toast ── */
+  .toast-container { position: fixed; bottom: 20px; right: 20px; z-index: 300; display: flex; flex-direction: column; gap: 8px; }
+  .toast {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 12px 16px;
+    font-size: 13px;
+    display: flex; align-items: center; gap: 8px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+    animation: slideIn 0.3s ease;
+    min-width: 220px;
+    max-width: 320px;
+  }
+  @keyframes slideIn { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
+  .toast.success { border-left: 3px solid var(--accent2); }
+  .toast.error { border-left: 3px solid var(--accent3); }
+  .toast.info { border-left: 3px solid var(--accent4); }
+
+  /* ── Timeline ── */
+  .timeline-item {
+    display: flex;
+    gap: 12px;
+    padding-bottom: 16px;
+    position: relative;
+  }
+  .timeline-item::before {
+    content: '';
+    position: absolute;
+    left: 17px; top: 28px; bottom: 0;
+    width: 1px;
+    background: var(--border);
+  }
+  .timeline-item:last-child::before { display: none; }
+  .timeline-dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    background: var(--accent);
+    flex-shrink: 0;
+    margin-top: 5px;
+    border: 2px solid var(--bg);
+    box-shadow: 0 0 0 2px var(--accent);
+    z-index: 1;
+    margin-left: 12px;
+  }
+  .timeline-content { flex: 1; }
+  .timeline-title { font-size: 13px; font-weight: 600; }
+  .timeline-time { font-size: 11px; color: var(--text3); }
+
+  /* section spacing */
+  .section { margin-bottom: 24px; }
+  .flex-between { display: flex; justify-content: space-between; align-items: center; }
+  .flex-gap { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+  .mt-8 { margin-top: 8px; }
+  .mt-16 { margin-top: 16px; }
+  .gap-y > * + * { margin-top: 8px; }
+</style>
+</head>
+<body>
+
+<!-- Sidebar Overlay (mobile) -->
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+<!-- Sidebar -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-logo">📚 <span>Study<strong style="color:var(--accent)">Flow</strong></span></div>
+  
+  <div class="nav-label">Menu Utama</div>
+  <div class="nav-item active" data-page="dashboard" onclick="navigate(this)">
+    <span class="icon">🏠</span> Dashboard
+  </div>
+  <div class="nav-item" data-page="tasks" onclick="navigate(this)">
+    <span class="icon">✅</span> Tugas
+  </div>
+  <div class="nav-item" data-page="habits" onclick="navigate(this)">
+    <span class="icon">🔥</span> Habit Tracker
+  </div>
+  <div class="nav-item" data-page="goals" onclick="navigate(this)">
+    <span class="icon">🎯</span> Goal Tracker
+  </div>
+  <div class="nav-item" data-page="reflection" onclick="navigate(this)">
+    <span class="icon">📓</span> Refleksi
+  </div>
+
+  <div class="sidebar-footer">
+    <div class="greeting">Semangat belajar! <strong id="sidebarDate"></strong></div>
+  </div>
+</aside>
+
+<!-- Mobile Topbar -->
+<div class="topbar">
+  <div class="topbar-logo">Study<span>Flow</span></div>
+  <button class="hamburger" onclick="toggleSidebar()">☰</button>
+</div>
+
+<!-- Main Content -->
+<main class="main">
+
+  <!-- ══ DASHBOARD ══ -->
+  <div class="page active" id="page-dashboard">
+    <div class="page-header">
+      <div>
+        <div class="page-title" id="dashGreeting">Selamat Pagi! 👋</div>
+        <div class="page-subtitle" id="dashDate">Hari ini, <span id="fullDate"></span></div>
+      </div>
+      <button class="btn btn-primary" onclick="openModal('addTaskModal')">＋ Tambah Tugas</button>
+    </div>
+
+    <!-- Stats -->
+    <div class="grid-3 section" id="statsGrid">
+      <div class="stat-card yellow">
+        <div class="stat-label">TUGAS HARI INI</div>
+        <div class="stat-value" id="statTodayTasks">0</div>
+        <div class="stat-sub">tugas aktif</div>
+      </div>
+      <div class="stat-card green">
+        <div class="stat-label">SELESAI MINGGU INI</div>
+        <div class="stat-value" id="statDone">0</div>
+        <div class="stat-sub">tugas diselesaikan</div>
+      </div>
+      <div class="stat-card pink">
+        <div class="stat-label">STREAK TERBAIK</div>
+        <div class="stat-value" id="statStreak">0</div>
+        <div class="stat-sub">hari beruntun</div>
+      </div>
+    </div>
+
+    <div class="grid-2 section">
+      <!-- Upcoming Tasks -->
+      <div class="card">
+        <div class="flex-between" style="margin-bottom:16px">
+          <div class="card-title">Tugas Mendatang</div>
+          <button class="btn btn-ghost btn-sm" onclick="navigate(document.querySelector('[data-page=tasks]'))">Semua</button>
+        </div>
+        <div id="dashTasks">
+          <div class="empty"><div class="empty-icon">📋</div><div class="empty-text">Belum ada tugas</div></div>
+        </div>
+      </div>
+
+      <!-- Today's Habits -->
+      <div class="card">
+        <div class="flex-between" style="margin-bottom:16px">
+          <div class="card-title">Habit Hari Ini</div>
+          <button class="btn btn-ghost btn-sm" onclick="navigate(document.querySelector('[data-page=habits]'))">Semua</button>
+        </div>
+        <div id="dashHabits">
+          <div class="empty"><div class="empty-icon">🌱</div><div class="empty-text">Belum ada habit</div></div>
+        </div>
+        <div class="progress-wrap mt-16" id="dashHabitProgress" style="display:none">
+          <div class="progress-label"><span>Progress Hari Ini</span><span id="dashHabitPct">0%</span></div>
+          <div class="progress-bar"><div class="progress-fill" id="dashHabitBar" style="width:0%"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Goals Overview -->
+    <div class="card section">
+      <div class="flex-between" style="margin-bottom:16px">
+        <div class="card-title">Progress Goal</div>
+        <button class="btn btn-ghost btn-sm" onclick="navigate(document.querySelector('[data-page=goals]'))">Lihat Semua</button>
+      </div>
+      <div id="dashGoals">
+        <div class="empty"><div class="empty-icon">🎯</div><div class="empty-text">Belum ada goal</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ TASKS ══ -->
+  <div class="page" id="page-tasks">
+    <div class="page-header">
+      <div>
+        <div class="page-title">Daftar Tugas ✅</div>
+        <div class="page-subtitle">Kelola semua tugas dan deadline kamu</div>
+      </div>
+      <button class="btn btn-primary" onclick="openModal('addTaskModal')">＋ Tambah Tugas</button>
+    </div>
+
+    <div class="card section">
+      <div class="flex-gap" style="margin-bottom:16px">
+        <input type="text" id="taskSearch" placeholder="🔍 Cari tugas..." style="max-width:240px" oninput="renderTasks()">
+        <select id="taskFilter" onchange="renderTasks()" style="width:auto;min-width:130px">
+          <option value="all">Semua</option>
+          <option value="active">Aktif</option>
+          <option value="done">Selesai</option>
+          <option value="urgent">Mendesak</option>
+        </select>
+        <select id="taskSort" onchange="renderTasks()" style="width:auto;min-width:160px">
+          <option value="deadline">Urutkan: Deadline</option>
+          <option value="priority">Urutkan: Prioritas</option>
+          <option value="name">Urutkan: Nama</option>
+        </select>
+      </div>
+      <div class="progress-wrap" style="margin-bottom:16px">
+        <div class="progress-label">
+          <span>Overall Progress</span>
+          <span id="taskOverallPct">0%</span>
+        </div>
+        <div class="progress-bar"><div class="progress-fill" id="taskOverallBar" style="width:0%"></div></div>
+      </div>
+      <div id="taskList"></div>
+    </div>
+  </div>
+
+  <!-- ══ HABITS ══ -->
+  <div class="page" id="page-habits">
+    <div class="page-header">
+      <div>
+        <div class="page-title">Habit Tracker 🔥</div>
+        <div class="page-subtitle">Bangun kebiasaan positif setiap harinya</div>
+      </div>
+      <button class="btn btn-primary" onclick="openModal('addHabitModal')">＋ Tambah Habit</button>
+    </div>
+
+    <div class="grid-2 section">
+      <div class="stat-card green">
+        <div class="stat-label">STREAK TERPANJANG</div>
+        <div class="stat-value" id="habitBestStreak">0</div>
+        <div class="stat-sub">hari beruntun</div>
+      </div>
+      <div class="stat-card yellow">
+        <div class="stat-label">HABIT AKTIF</div>
+        <div class="stat-value" id="habitActive">0</div>
+        <div class="stat-sub">kebiasaan terdaftar</div>
+      </div>
+    </div>
+
+    <div class="card section">
+      <div class="card-title">Checklist Hari Ini</div>
+      <div id="habitList">
+        <div class="empty"><div class="empty-icon">🌿</div><div class="empty-text">Tambahkan habit untuk mulai tracking!</div></div>
+      </div>
+    </div>
+
+    <div class="card section">
+      <div class="card-title">Kalender Minggu Ini</div>
+      <div id="habitHeatmap"></div>
+    </div>
+  </div>
+
+  <!-- ══ GOALS ══ -->
+  <div class="page" id="page-goals">
+    <div class="page-header">
+      <div>
+        <div class="page-title">Goal Tracker 🎯</div>
+        <div class="page-subtitle">Tetapkan dan pantau target mingguan & bulanan</div>
+      </div>
+      <button class="btn btn-primary" onclick="openModal('addGoalModal')">＋ Tambah Goal</button>
+    </div>
+
+    <div class="card section">
+      <div class="card-title">Target Mingguan</div>
+      <div id="goalWeekly">
+        <div class="empty"><div class="empty-icon">📅</div><div class="empty-text">Tambahkan target mingguan</div></div>
+      </div>
+    </div>
+
+    <div class="card section">
+      <div class="card-title">Target Bulanan</div>
+      <div id="goalMonthly">
+        <div class="empty"><div class="empty-icon">🗓️</div><div class="empty-text">Tambahkan target bulanan</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ REFLECTION ══ -->
+  <div class="page" id="page-reflection">
+    <div class="page-header">
+      <div>
+        <div class="page-title">Refleksi Harian 📓</div>
+        <div class="page-subtitle">Catat pikiran dan evaluasi dirimu</div>
+      </div>
+    </div>
+
+    <div class="grid-2 section">
+      <!-- Write -->
+      <div class="card">
+        <div class="card-title">Tulis Hari Ini</div>
+        <div class="reflection-date" id="reflectionToday"></div>
+        <div style="height:12px"></div>
+
+        <div class="form-field" style="margin-bottom:12px">
+          <div class="form-label">Bagaimana harimu? 😊</div>
+          <div class="mood-picker" id="moodPicker">
+            <div class="mood-opt" data-mood="Luar Biasa 🤩">Luar Biasa 🤩</div>
+            <div class="mood-opt" data-mood="Baik 😊">Baik 😊</div>
+            <div class="mood-opt" data-mood="Biasa 😐">Biasa 😐</div>
+            <div class="mood-opt" data-mood="Kurang 😔">Kurang 😔</div>
+            <div class="mood-opt" data-mood="Buruk 😞">Buruk 😞</div>
+          </div>
+        </div>
+
+        <div class="form-field" style="margin-bottom:12px">
+          <div class="form-label">Catatan harian</div>
+          <textarea id="reflectionNote" placeholder="Apa yang kamu pelajari hari ini? Apa yang berhasil? Apa yang perlu diperbaiki?" style="min-height:120px"></textarea>
+        </div>
+
+        <div class="form-field" style="margin-bottom:12px">
+          <div class="form-label">Evaluasi diri (1–10)</div>
+          <div class="score-picker" id="scorePicker">
+            <button class="score-btn" data-score="1">1</button>
+            <button class="score-btn" data-score="2">2</button>
+            <button class="score-btn" data-score="3">3</button>
+            <button class="score-btn" data-score="4">4</button>
+            <button class="score-btn" data-score="5">5</button>
+            <button class="score-btn" data-score="6">6</button>
+            <button class="score-btn" data-score="7">7</button>
+            <button class="score-btn" data-score="8">8</button>
+            <button class="score-btn" data-score="9">9</button>
+            <button class="score-btn" data-score="10">10</button>
+          </div>
+        </div>
+
+        <div class="form-field" style="margin-bottom:16px">
+          <div class="form-label">3 hal yang kamu syukuri hari ini</div>
+          <input type="text" id="grateful1" placeholder="1. ..." style="margin-bottom:6px">
+          <input type="text" id="grateful2" placeholder="2. ...">
+          <input type="text" id="grateful3" placeholder="3. ..." style="margin-top:6px">
+        </div>
+
+        <button class="btn btn-primary" style="width:100%" onclick="saveReflection()">💾 Simpan Refleksi</button>
+      </div>
+
+      <!-- History -->
+      <div class="card">
+        <div class="card-title">Riwayat Refleksi</div>
+        <div id="reflectionHistory">
+          <div class="empty"><div class="empty-icon">📖</div><div class="empty-text">Belum ada refleksi. Mulai tulis hari ini!</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<!-- Bottom Nav (mobile) -->
+<nav class="bottom-nav">
+  <div class="bnav-item active" data-page="dashboard" onclick="navigate(this)"><span class="icon">🏠</span>Home</div>
+  <div class="bnav-item" data-page="tasks" onclick="navigate(this)"><span class="icon">✅</span>Tugas</div>
+  <div class="bnav-item" data-page="habits" onclick="navigate(this)"><span class="icon">🔥</span>Habit</div>
+  <div class="bnav-item" data-page="goals" onclick="navigate(this)"><span class="icon">🎯</span>Goal</div>
+  <div class="bnav-item" data-page="reflection" onclick="navigate(this)"><span class="icon">📓</span>Refleksi</div>
+</nav>
+
+<!-- Toast Container -->
+<div class="toast-container" id="toastContainer"></div>
+
+<!-- ══ MODALS ══ -->
+
+<!-- Add Task Modal -->
+<div class="modal-overlay" id="addTaskModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Tambah Tugas</div>
+      <button class="modal-close" onclick="closeModal('addTaskModal')">×</button>
+    </div>
+    <div class="form-field" style="margin-bottom:12px">
+      <div class="form-label">Nama Tugas *</div>
+      <input type="text" id="newTaskName" placeholder="Contoh: Buat laporan praktikum">
+    </div>
+    <div class="form-grid">
+      <div class="form-field">
+        <div class="form-label">Mata Pelajaran</div>
+        <input type="text" id="newTaskSubject" placeholder="Matematika, Fisika...">
+      </div>
+      <div class="form-field">
+        <div class="form-label">Prioritas</div>
+        <select id="newTaskPriority">
+          <option value="low">Rendah</option>
+          <option value="medium" selected>Sedang</option>
+          <option value="high">Tinggi</option>
+        </select>
+      </div>
+      <div class="form-field">
+        <div class="form-label">Deadline</div>
+        <input type="date" id="newTaskDeadline">
+      </div>
+      <div class="form-field">
+        <div class="form-label">Progress (%)</div>
+        <input type="number" id="newTaskProgress" placeholder="0" min="0" max="100" value="0">
+      </div>
+      <div class="form-full form-field">
+        <div class="form-label">Catatan</div>
+        <textarea id="newTaskNote" placeholder="Detail tugas..."></textarea>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('addTaskModal')">Batal</button>
+      <button class="btn btn-primary" onclick="addTask()">Simpan</button>
+    </div>
+  </div>
+</div>
+
+<!-- Edit Task Modal -->
+<div class="modal-overlay" id="editTaskModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Edit Tugas</div>
+      <button class="modal-close" onclick="closeModal('editTaskModal')">×</button>
+    </div>
+    <div class="form-field" style="margin-bottom:12px">
+      <div class="form-label">Nama Tugas *</div>
+      <input type="text" id="editTaskName">
+    </div>
+    <div class="form-grid">
+      <div class="form-field">
+        <div class="form-label">Mata Pelajaran</div>
+        <input type="text" id="editTaskSubject">
+      </div>
+      <div class="form-field">
+        <div class="form-label">Prioritas</div>
+        <select id="editTaskPriority">
+          <option value="low">Rendah</option>
+          <option value="medium">Sedang</option>
+          <option value="high">Tinggi</option>
+        </select>
+      </div>
+      <div class="form-field">
+        <div class="form-label">Deadline</div>
+        <input type="date" id="editTaskDeadline">
+      </div>
+      <div class="form-field">
+        <div class="form-label">Progress (%)</div>
+        <input type="number" id="editTaskProgress" min="0" max="100">
+      </div>
+      <div class="form-full form-field">
+        <div class="form-label">Catatan</div>
+        <textarea id="editTaskNote"></textarea>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('editTaskModal')">Batal</button>
+      <button class="btn btn-primary" onclick="saveEditTask()">Simpan</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add Habit Modal -->
+<div class="modal-overlay" id="addHabitModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Tambah Habit</div>
+      <button class="modal-close" onclick="closeModal('addHabitModal')">×</button>
+    </div>
+    <div class="form-field" style="margin-bottom:12px">
+      <div class="form-label">Nama Habit *</div>
+      <input type="text" id="newHabitName" placeholder="Contoh: Baca buku 30 menit">
+    </div>
+    <div class="form-grid">
+      <div class="form-field">
+        <div class="form-label">Ikon</div>
+        <input type="text" id="newHabitIcon" placeholder="📚" maxlength="2">
+      </div>
+      <div class="form-field">
+        <div class="form-label">Kategori</div>
+        <select id="newHabitCategory">
+          <option value="belajar">📚 Belajar</option>
+          <option value="kesehatan">💪 Kesehatan</option>
+          <option value="mindfulness">🧘 Mindfulness</option>
+          <option value="sosial">👥 Sosial</option>
+          <option value="kreatif">🎨 Kreatif</option>
+          <option value="lainnya">⭐ Lainnya</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('addHabitModal')">Batal</button>
+      <button class="btn btn-primary" onclick="addHabit()">Simpan</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add Goal Modal -->
+<div class="modal-overlay" id="addGoalModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Tambah Goal</div>
+      <button class="modal-close" onclick="closeModal('addGoalModal')">×</button>
+    </div>
+    <div class="form-field" style="margin-bottom:12px">
+      <div class="form-label">Nama Goal *</div>
+      <input type="text" id="newGoalName" placeholder="Contoh: Selesaikan bab 5 Fisika">
+    </div>
+    <div class="form-grid">
+      <div class="form-field">
+        <div class="form-label">Tipe Target</div>
+        <select id="newGoalType">
+          <option value="weekly">Mingguan</option>
+          <option value="monthly">Bulanan</option>
+        </select>
+      </div>
+      <div class="form-field">
+        <div class="form-label">Progress Awal (%)</div>
+        <input type="number" id="newGoalProgress" placeholder="0" min="0" max="100" value="0">
+      </div>
+      <div class="form-full form-field">
+        <div class="form-label">Deskripsi</div>
+        <textarea id="newGoalDesc" placeholder="Detail goal kamu..."></textarea>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('addGoalModal')">Batal</button>
+      <button class="btn btn-primary" onclick="addGoal()">Simpan</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ════════════════════════════════════════════════════════════
+//  CONSTANTS
+// ════════════════════════════════════════════════════════════
+const STORAGE_KEY = 'studyflow_state';
+const DAYS = ['Min','Sen','Sel','Rab','Kam','Jum','Sab'];
+const DAYS_FULL = ['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
+const MONTHS = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+
+// ════════════════════════════════════════════════════════════
+//  DOM / GENERIC HELPERS
+// ════════════════════════════════════════════════════════════
+const $ = (id) => document.getElementById(id);
+
+function uid() { return Math.random().toString(36).substr(2, 9); }
+
+// Membatasi angka progress/skor ke rentang 0–100 dan membuang nilai non-numerik
+function clampPercent(value) {
+  const n = parseInt(value, 10);
+  if (!Number.isFinite(n)) return 0;
+  return Math.min(100, Math.max(0, n));
+}
+
+// ════════════════════════════════════════════════════════════
+//  DATE UTILITIES
+//  Semua tanggal dibaca/ditulis melalui helper ini agar konsisten.
+//
+//  BUG LAMA: kode sebelumnya memakai `new Date().toISOString().split('T')[0]`
+//  untuk mendapatkan "tanggal hari ini". toISOString() mengonversi waktu
+//  ke UTC — sehingga untuk pengguna WIB/WITA/WIT (UTC+7/+8/+9), pada
+//  jam-jam awal hari (misal pukul 00:00–06:59 WIB) tanggal yang
+//  dihasilkan masih tanggal KEMARIN menurut UTC. Akibatnya tugas/habit
+//  "hari ini" bisa tercatat di tanggal yang salah.
+//
+//  Begitu juga `new Date("YYYY-MM-DD")` diparse sebagai tengah malam UTC,
+//  bukan tengah malam lokal — bisa menggeser tanggal saat dibaca kembali
+//  dengan getDate()/getDay() di zona waktu tertentu.
+//
+//  Solusi: semua konversi Date <-> "YYYY-MM-DD" memakai komponen waktu
+//  LOKAL (getFullYear/getMonth/getDate), tidak pernah lewat toISOString().
+// ════════════════════════════════════════════════════════════
+const DateUtil = {
+  pad(n) { return String(n).padStart(2, '0'); },
+
+  // Date -> "YYYY-MM-DD" (berbasis komponen tanggal lokal)
+  toKey(date) {
+    return `${date.getFullYear()}-${this.pad(date.getMonth() + 1)}-${this.pad(date.getDate())}`;
+  },
+
+  // "YYYY-MM-DD" -> Date pada tengah malam lokal
+  fromKey(key) {
+    if (!key || typeof key !== 'string') return null;
+    const parts = key.split('-').map(Number);
+    if (parts.length !== 3 || parts.some(n => Number.isNaN(n))) return null;
+    const [y, m, d] = parts;
+    return new Date(y, m - 1, d);
+  },
+
+  todayKey() {
+    return this.toKey(new Date());
+  },
+
+  addDays(date, n) {
+    const d = new Date(date);
+    d.setDate(d.getDate() + n);
+    return d;
+  },
+
+  // Selisih hari (keyA - keyB), bisa negatif. NaN jika salah satu key tidak valid.
+  diffDays(keyA, keyB) {
+    const a = this.fromKey(keyA);
+    const b = this.fromKey(keyB);
+    if (!a || !b) return NaN;
+    return Math.round((a - b) / 86400000);
+  },
+
+  // 7 tanggal minggu berjalan, urut Minggu → Sabtu (selaras dengan array DAYS)
+  getWeekDates() {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const sunday = this.addDays(today, -today.getDay());
+    return Array.from({ length: 7 }, (_, i) => this.toKey(this.addDays(sunday, i)));
+  },
+
+  // Label minggu kalender sederhana — dipakai untuk statistik "selesai minggu ini"
+  getWeekKey() {
+    const d = new Date();
+    const jan = new Date(d.getFullYear(), 0, 1);
+    const week = Math.ceil((((d - jan) / 86400000) + jan.getDay() + 1) / 7);
+    return `${d.getFullYear()}-W${week}`;
+  },
+
+  // "Senin, 14 Juni 2026"
+  formatLong(key) {
+    const d = this.fromKey(key);
+    if (!d) return '';
+    return `${DAYS_FULL[d.getDay()]}, ${d.getDate()} ${MONTHS[d.getMonth()]} ${d.getFullYear()}`;
+  },
+
+  // "14 Juni" — jika key kosong/invalid, fallback ke hari ini
+  formatShort(key) {
+    const d = key ? this.fromKey(key) : null;
+    const target = d || new Date();
+    return `${target.getDate()} ${MONTHS[target.getMonth()]}`;
+  },
+};
+
+// ════════════════════════════════════════════════════════════
+//  DEFAULT STATE & SAFE LOADING
+//  - Struktur default selalu lengkap (tasks/habits/goals/reflections).
+//  - Setiap item divalidasi field-by-field saat load: field tak
+//    dikenal/tak valid diabaikan & diganti nilai default yang aman.
+//  - Item yang sama sekali tidak valid (id/nama hilang) dibuang,
+//    bukan membuat seluruh state korup.
+//  - Field UI sementara (mood/skor terpilih, id tugas yang diedit)
+//    TIDAK lagi disimpan ke localStorage — itu murni state UI.
+// ════════════════════════════════════════════════════════════
+function createDefaultState() {
+  return {
+    tasks: [],
+    habits: [],
+    goals: [],
+    reflections: [],
+  };
+}
+
+function sanitizeTask(t) {
+  if (!t || typeof t !== 'object') return null;
+  if (typeof t.id !== 'string' || typeof t.name !== 'string' || !t.name.trim()) return null;
+  return {
+    id: t.id,
+    name: t.name,
+    subject: typeof t.subject === 'string' ? t.subject : '',
+    priority: ['low', 'medium', 'high'].includes(t.priority) ? t.priority : 'medium',
+    deadline: typeof t.deadline === 'string' ? t.deadline : '',
+    progress: clampPercent(t.progress),
+    note: typeof t.note === 'string' ? t.note : '',
+    done: !!t.done,
+    createdAt: typeof t.createdAt === 'string' ? t.createdAt : DateUtil.todayKey(),
+    weekKey: typeof t.weekKey === 'string' ? t.weekKey : DateUtil.getWeekKey(),
+  };
+}
+
+function sanitizeHabit(h) {
+  if (!h || typeof h !== 'object') return null;
+  if (typeof h.id !== 'string' || typeof h.name !== 'string' || !h.name.trim()) return null;
+
+  const completions = {};
+  if (h.completions && typeof h.completions === 'object') {
+    Object.keys(h.completions).forEach(key => {
+      if (/^\d{4}-\d{2}-\d{2}$/.test(key) && h.completions[key]) completions[key] = true;
+    });
+  }
+
+  return {
+    id: h.id,
+    name: h.name,
+    icon: (typeof h.icon === 'string' && h.icon.trim()) ? h.icon : '⭐',
+    category: typeof h.category === 'string' ? h.category : 'lainnya',
+    completions,
+    streak: 0,        // dihitung ulang setelah load (lihat Store.load)
+    bestStreak: Number.isFinite(h.bestStreak) ? Math.max(0, Math.round(h.bestStreak)) : 0,
+  };
+}
+
+function sanitizeGoal(g) {
+  if (!g || typeof g !== 'object') return null;
+  if (typeof g.id !== 'string' || typeof g.name !== 'string' || !g.name.trim()) return null;
+  return {
+    id: g.id,
+    name: g.name,
+    type: g.type === 'monthly' ? 'monthly' : 'weekly',
+    progress: clampPercent(g.progress),
+    desc: typeof g.desc === 'string' ? g.desc : '',
+    createdAt: typeof g.createdAt === 'string' ? g.createdAt : DateUtil.todayKey(),
+  };
+}
+
+function sanitizeReflection(r) {
+  if (!r || typeof r !== 'object') return null;
+  if (typeof r.id !== 'string' || typeof r.note !== 'string' || !r.note.trim()) return null;
+  const rawScore = Number.isFinite(r.score) ? Math.round(r.score) : 0;
+  return {
+    id: r.id,
+    date: typeof r.date === 'string' ? r.date : DateUtil.todayKey(),
+    mood: typeof r.mood === 'string' ? r.mood : '-',
+    score: Math.min(10, Math.max(0, rawScore)),
+    note: r.note,
+    grateful: Array.isArray(r.grateful) ? r.grateful.filter(x => typeof x === 'string' && x.trim()) : [],
+  };
+}
+
+function sanitizeState(raw) {
+  const base = createDefaultState();
+  if (!raw || typeof raw !== 'object') return base;
+
+  if (Array.isArray(raw.tasks)) base.tasks = raw.tasks.map(sanitizeTask).filter(Boolean);
+  if (Array.isArray(raw.habits)) base.habits = raw.habits.map(sanitizeHabit).filter(Boolean);
+  if (Array.isArray(raw.goals)) base.goals = raw.goals.map(sanitizeGoal).filter(Boolean);
+  if (Array.isArray(raw.reflections)) base.reflections = raw.reflections.map(sanitizeReflection).filter(Boolean);
+
+  return base;
+}
+
+// ════════════════════════════════════════════════════════════
+//  CENTRAL STORE
+//  Satu-satunya cara mengubah data aplikasi: Store.update(mutator, affected)
+//    - mutator(state)  → fungsi yang memutasi draft state secara terkontrol
+//    - affected        → daftar domain ('tasks' | 'habits' | 'goals' | 'reflection')
+//                         yang berubah, dipakai Renderer untuk menentukan
+//                         bagian UI mana yang perlu digambar ulang.
+//
+//  Tidak ada lagi mutasi `state.xxx = ...` tersebar bebas di banyak
+//  fungsi — semua lewat satu pintu ini, lalu otomatis disimpan & dirender.
+// ════════════════════════════════════════════════════════════
+const Store = {
+  state: createDefaultState(),
+
+  load() {
+    let raw = null;
+    try {
+      const text = localStorage.getItem(STORAGE_KEY);
+      if (text) raw = JSON.parse(text);
+    } catch (err) {
+      console.warn('StudyFlow: data tersimpan tidak valid (corrupt), menggunakan default.', err);
+      raw = null;
+    }
+    this.state = sanitizeState(raw);
+    // Streak selalu dihitung ulang dari data completions yang valid,
+    // bukan dipercaya mentah-mentah dari localStorage.
+    this.state.habits.forEach(h => HabitModule.recalcStreak(h));
+  },
+
+  persist() {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(this.state));
+    } catch (err) {
+      console.warn('StudyFlow: gagal menyimpan data ke localStorage.', err);
+    }
+  },
+
+  update(mutator, affected = []) {
+    mutator(this.state);
+    this.persist();
+    Renderer.request(affected);
+  },
+};
+
+// ════════════════════════════════════════════════════════════
+//  RENDERER
+//  Hanya merender halaman yang SEDANG aktif & relevan dengan domain
+//  data yang berubah. Dashboard tidak ikut dirender ulang setiap aksi
+//  di halaman lain — ia hanya digambar ulang saat sedang ditampilkan,
+//  atau saat pengguna baru berpindah ke dashboard (selalu fresh).
+// ════════════════════════════════════════════════════════════
+const Renderer = {
+  currentPage: 'dashboard',
+
+  pageRenderers: {
+    dashboard: () => DashboardModule.render(),
+    tasks: () => TaskModule.render(),
+    habits: () => HabitModule.render(),
+    goals: () => GoalModule.render(),
+    reflection: () => ReflectionModule.render(),
+  },
+
+  // domain data -> halaman-halaman yang menampilkan data tersebut
+  domainPages: {
+    tasks: ['tasks', 'dashboard'],
+    habits: ['habits', 'dashboard'],
+    goals: ['goals', 'dashboard'],
+    reflection: ['reflection'],
+  },
+
+  request(affected) {
+    const pages = new Set();
+    affected.forEach(domain => (this.domainPages[domain] || []).forEach(p => pages.add(p)));
+    pages.forEach(page => {
+      if (page === this.currentPage) this.renderPage(page);
+    });
+  },
+
+  renderPage(page) {
+    const fn = this.pageRenderers[page];
+    if (fn) fn();
+  },
+
+  renderCurrentPage() {
+    this.renderPage(this.currentPage);
+  },
+};
+
+// ════════════════════════════════════════════════════════════
+//  UI / NAVIGATION MODULE
+// ════════════════════════════════════════════════════════════
+const UI = {
+  navigate(el) {
+    const page = el.dataset.page;
+    document.querySelectorAll('.nav-item, .bnav-item').forEach(n => n.classList.remove('active'));
+    document.querySelectorAll(`[data-page="${page}"]`).forEach(n => n.classList.add('active'));
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    $('page-' + page).classList.add('active');
+    if (window.innerWidth <= 768) this.closeSidebar();
+
+    Renderer.currentPage = page;
+    Renderer.renderCurrentPage();
+  },
+
+  toggleSidebar() {
+    $('sidebar').classList.toggle('open');
+    $('sidebarOverlay').classList.toggle('open');
+  },
+
+  closeSidebar() {
+    $('sidebar').classList.remove('open');
+    $('sidebarOverlay').classList.remove('open');
+  },
+
+  openModal(id) { $(id).classList.add('open'); },
+  closeModal(id) { $(id).classList.remove('open'); },
+
+  initModalDismiss() {
+    document.querySelectorAll('.modal-overlay').forEach(el => {
+      el.addEventListener('click', e => { if (e.target === el) el.classList.remove('open'); });
+    });
+  },
+
+  toast(msg, type = 'success') {
+    const icons = { success: '✅', error: '❌', info: 'ℹ️' };
+    const t = document.createElement('div');
+    t.className = `toast ${type}`;
+    t.innerHTML = `<span>${icons[type] || icons.success}</span> ${msg}`;
+    $('toastContainer').appendChild(t);
+    setTimeout(() => t.remove(), 3000);
+  },
+
+  // Tanggal/sapaan statis yang hanya perlu di-set sekali saat load
+  initDates() {
+    const now = new Date();
+    const h = now.getHours();
+    const greet = h < 12 ? 'Selamat Pagi' : h < 15 ? 'Selamat Siang' : h < 18 ? 'Selamat Sore' : 'Selamat Malam';
+    const emoji = h < 12 ? '🌅' : h < 15 ? '☀️' : h < 18 ? '🌇' : '🌙';
+
+    const gEl = $('dashGreeting');
+    if (gEl) gEl.textContent = `${greet}! ${emoji}`;
+
+    const today = DateUtil.todayKey();
+
+    const fdEl = $('fullDate');
+    if (fdEl) fdEl.textContent = DateUtil.formatLong(today);
+
+    const sdEl = $('sidebarDate');
+    if (sdEl) sdEl.textContent = DateUtil.formatShort(today);
+
+    const rtEl = $('reflectionToday');
+    if (rtEl) rtEl.textContent = DateUtil.formatShort(today);
+  },
+};
+
+// ════════════════════════════════════════════════════════════
+//  SHARED HTML TEMPLATES
+//  Dipakai bersama oleh TaskModule, GoalModule, dan DashboardModule
+//  agar tampilan kartu tugas/goal konsisten di semua halaman.
+// ════════════════════════════════════════════════════════════
+const Templates = {
+  priorityBadge(p) {
+    if (p === 'high') return '<span class="badge badge-red">Tinggi</span>';
+    if (p === 'medium') return '<span class="badge badge-yellow">Sedang</span>';
+    return '<span class="badge badge-gray">Rendah</span>';
+  },
+
+  deadlineStatus(deadlineKey) {
+    if (!deadlineKey) return { label: '', urgent: false };
+    const diff = DateUtil.diffDays(deadlineKey, DateUtil.todayKey());
+    if (Number.isNaN(diff)) return { label: '', urgent: false };
+    if (diff < 0) return { label: `Terlambat ${-diff} hari`, urgent: true };
+    if (diff === 0) return { label: 'Hari ini!', urgent: true };
+    if (diff === 1) return { label: 'Besok', urgent: true };
+    if (diff <= 3) return { label: `${diff} hari lagi`, urgent: true };
+    return { label: `${diff} hari lagi`, urgent: false };
+  },
+
+  task(task, compact = false) {
+    const dl = this.deadlineStatus(task.deadline);
+    const dlHtml = task.deadline ? `<span class="task-deadline ${dl.urgent ? 'urgent' : ''}">📅 ${dl.label}</span>` : '';
+    const subjectHtml = task.subject ? `<span class="badge badge-blue">${task.subject}</span>` : '';
+    const progressHtml = !compact ? `
+      <div class="progress-wrap" style="margin-top:8px">
+        <div class="progress-label"><span>${task.progress}% selesai</span></div>
+        <div class="progress-bar"><div class="progress-fill" style="width:${task.progress}%"></div></div>
+      </div>` : '';
+
+    return `<div class="task-item ${task.done ? 'done' : ''}" id="task-${task.id}">
+      <div class="task-check ${task.done ? 'checked' : ''}" onclick="toggleTask('${task.id}')">${task.done ? '✓' : ''}</div>
+      <div style="flex:1">
+        <div class="task-name">${task.name}</div>
+        <div class="task-meta">${subjectHtml}${this.priorityBadge(task.priority)}${dlHtml}</div>
+        ${progressHtml}
+      </div>
+      <div class="task-actions">
+        <button class="btn-icon" onclick="editTask('${task.id}')" title="Edit">✏️</button>
+        <button class="btn-icon" onclick="deleteTask('${task.id}')" title="Hapus">🗑️</button>
+      </div>
+    </div>`;
+  },
+
+  goal(g) {
+    const color = g.progress === 100 ? 'var(--accent2)' : g.progress >= 50 ? 'var(--accent4)' : 'var(--accent3)';
+    return `<div class="goal-item">
+      <div class="goal-header">
+        <div>
+          <div class="goal-title">${g.name}</div>
+          ${g.desc ? `<div class="goal-desc">${g.desc}</div>` : ''}
+        </div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <div class="goal-percent" style="color:${color}">${g.progress}%</div>
+          <button class="btn-icon" onclick="deleteGoal('${g.id}')" title="Hapus">🗑️</button>
+        </div>
+      </div>
+      <div class="goal-progress progress-wrap">
+        <div class="progress-bar"><div class="progress-fill" style="width:${g.progress}%;background:${color}"></div></div>
+      </div>
+      <div style="margin-top:10px;display:flex;align-items:center;gap:8px">
+        <input type="range" min="0" max="100" value="${g.progress}" style="flex:1;accent-color:var(--accent)" oninput="updateGoalProgress('${g.id}',this.value)">
+        <span style="font-size:11px;color:var(--text3);min-width:35px">${g.progress}%</span>
+      </div>
+    </div>`;
+  },
+};
+
+// ════════════════════════════════════════════════════════════
+//  TASK MODULE — CRUD, filter, sort, progress
+// ════════════════════════════════════════════════════════════
+const TaskModule = {
+  editingId: null,
+
+  add() {
+    const name = $('newTaskName').value.trim();
+    if (!name) { UI.toast('Nama tugas wajib diisi!', 'error'); return; }
+
+    const task = {
+      id: uid(),
+      name,
+      subject: $('newTaskSubject').value.trim(),
+      priority: $('newTaskPriority').value,
+      deadline: $('newTaskDeadline').value,
+      progress: clampPercent($('newTaskProgress').value),
+      note: $('newTaskNote').value.trim(),
+      done: false,
+      createdAt: DateUtil.todayKey(),
+      weekKey: DateUtil.getWeekKey(),
+    };
+
+    Store.update(state => { state.tasks.unshift(task); }, ['tasks']);
+    UI.closeModal('addTaskModal');
+    this.clearForm();
+    UI.toast('Tugas berhasil ditambahkan!');
+  },
+
+  clearForm() {
+    ['newTaskName', 'newTaskSubject', 'newTaskDeadline', 'newTaskNote'].forEach(id => { $(id).value = ''; });
+    $('newTaskProgress').value = 0;
+    $('newTaskPriority').value = 'medium';
+  },
+
+  toggle(id) {
+    Store.update(state => {
+      const t = state.tasks.find(t => t.id === id);
+      if (!t) return;
+      t.done = !t.done;
+      if (t.done) t.progress = 100;
+    }, ['tasks']);
+  },
+
+  remove(id) {
+    Store.update(state => { state.tasks = state.tasks.filter(t => t.id !== id); }, ['tasks']);
+    UI.toast('Tugas dihapus', 'info');
+  },
+
+  edit(id) {
+    const t = Store.state.tasks.find(t => t.id === id);
+    if (!t) return;
+    this.editingId = id;
+    $('editTaskName').value = t.name;
+    $('editTaskSubject').value = t.subject;
+    $('editTaskPriority').value = t.priority;
+    $('editTaskDeadline').value = t.deadline;
+    $('editTaskProgress').value = t.progress;
+    $('editTaskNote').value = t.note;
+    UI.openModal('editTaskModal');
+  },
+
+  saveEdit() {
+    const id = this.editingId;
+    if (!id) return;
+
+    const name = $('editTaskName').value.trim();
+    if (!name) { UI.toast('Nama tugas wajib diisi!', 'error'); return; }
+
+    const progress = clampPercent($('editTaskProgress').value);
+
+    Store.update(state => {
+      const t = state.tasks.find(t => t.id === id);
+      if (!t) return;
+      t.name = name;
+      t.subject = $('editTaskSubject').value.trim();
+      t.priority = $('editTaskPriority').value;
+      t.deadline = $('editTaskDeadline').value;
+      t.progress = progress;
+      t.note = $('editTaskNote').value.trim();
+      t.done = progress === 100;
+    }, ['tasks']);
+
+    this.editingId = null;
+    UI.closeModal('editTaskModal');
+    UI.toast('Tugas diperbarui!');
+  },
+
+  // Daftar tugas terfilter & terurut sesuai kontrol di halaman Tugas
+  getFilteredSorted() {
+    const search = ($('taskSearch')?.value || '').toLowerCase();
+    const filter = $('taskFilter')?.value || 'all';
+    const sort = $('taskSort')?.value || 'deadline';
+    const today = DateUtil.todayKey();
+
+    const tasks = Store.state.tasks.filter(t => {
+      if (search && !t.name.toLowerCase().includes(search) && !t.subject.toLowerCase().includes(search)) return false;
+      if (filter === 'active') return !t.done;
+      if (filter === 'done') return t.done;
+      if (filter === 'urgent') {
+        if (!t.deadline) return false;
+        return DateUtil.diffDays(t.deadline, today) <= 3;
+      }
+      return true;
+    });
+
+    tasks.sort((a, b) => {
+      if (sort === 'deadline') {
+        if (!a.deadline) return 1;
+        if (!b.deadline) return -1;
+        return DateUtil.diffDays(a.deadline, b.deadline);
+      }
+      if (sort === 'priority') {
+        const p = { high: 0, medium: 1, low: 2 };
+        return p[a.priority] - p[b.priority];
+      }
+      return a.name.localeCompare(b.name);
+    });
+
+    return tasks;
+  },
+
+  render() {
+    const el = $('taskList');
+    if (!el) return;
+
+    const tasks = this.getFilteredSorted();
+
+    const done = Store.state.tasks.filter(t => t.done).length;
+    const total = Store.state.tasks.length;
+    const pct = total ? Math.round((done / total) * 100) : 0;
+
+    const bar = $('taskOverallBar');
+    const pctEl = $('taskOverallPct');
+    if (bar) bar.style.width = pct + '%';
+    if (pctEl) pctEl.textContent = pct + '%';
+
+    if (tasks.length === 0) {
+      el.innerHTML = `<div class="empty"><div class="empty-icon">📋</div><div class="empty-text">Tidak ada tugas ditemukan</div></div>`;
+      return;
+    }
+    el.innerHTML = tasks.map(t => Templates.task(t)).join('');
+  },
+};
+
+// ════════════════════════════════════════════════════════════
+//  HABIT MODULE — checklist harian, streak, heatmap minggu
+//
+//  STREAK LOGIC (diperbaiki):
+//   - currentStreak: dihitung MUNDUR dari HARI INI, berhenti pada
+//     gap pertama (hari yang tidak ditandai). Konsisten & memakai
+//     DateUtil (tanggal lokal) sehingga tidak salah hitung di
+//     sekitar tengah malam.
+//   - bestStreak: rekor tertinggi sepanjang riwayat completions,
+//     TIDAK PERNAH berkurang. Dihitung dari longestStreak() +
+//     dibandingkan dengan nilai bestStreak yang sudah tersimpan,
+//     supaya tetap akurat walau data lama diubah/dihapus.
+// ════════════════════════════════════════════════════════════
+const HabitModule = {
+  add() {
+    const name = $('newHabitName').value.trim();
+    if (!name) { UI.toast('Nama habit wajib diisi!', 'error'); return; }
+
+    const habit = {
+      id: uid(),
+      name,
+      icon: $('newHabitIcon').value.trim() || '⭐',
+      category: $('newHabitCategory').value,
+      completions: {},
+      streak: 0,
+      bestStreak: 0,
+    };
+
+    Store.update(state => { state.habits.push(habit); }, ['habits']);
+    UI.closeModal('addHabitModal');
+    $('newHabitName').value = '';
+    $('newHabitIcon').value = '';
+    UI.toast('Habit ditambahkan!');
+  },
+
+  toggleDay(habitId, dateKey) {
+    Store.update(state => {
+      const h = state.habits.find(h => h.id === habitId);
+      if (!h) return;
+      if (h.completions[dateKey]) {
+        delete h.completions[dateKey];
+      } else {
+        h.completions[dateKey] = true;
+      }
+      this.recalcStreak(h);
+    }, ['habits']);
+  },
+
+  remove(id) {
+    Store.update(state => { state.habits = state.habits.filter(h => h.id !== id); }, ['habits']);
+    UI.toast('Habit dihapus', 'info');
+  },
+
+  // Hitung mundur dari hari ini sampai ditemukan gap (hari tanpa centang)
+  currentStreak(completions) {
+    let streak = 0;
+    let cursor = DateUtil.fromKey(DateUtil.todayKey());
+    const MAX_LOOKBACK = 3650; // batas aman ~10 tahun, mencegah loop tak terbatas
+    for (let i = 0; i < MAX_LOOKBACK; i++) {
+      if (!completions[DateUtil.toKey(cursor)]) break;
+      streak++;
+      cursor = DateUtil.addDays(cursor, -1);
+    }
+    return streak;
+  },
+
+  // Rentang beruntun terpanjang sepanjang riwayat completions
+  longestStreak(completions) {
+    const dates = Object.keys(completions).filter(k => completions[k]).sort();
+    if (dates.length === 0) return 0;
+    let longest = 1;
+    let run = 1;
+    for (let i = 1; i < dates.length; i++) {
+      run = DateUtil.diffDays(dates[i], dates[i - 1]) === 1 ? run + 1 : 1;
+      longest = Math.max(longest, run);
+    }
+    return longest;
+  },
+
+  recalcStreak(h) {
+    h.streak = this.currentStreak(h.completions);
+    h.bestStreak = Math.max(h.bestStreak || 0, h.streak, this.longestStreak(h.completions));
+  },
+
+  render() {
+    const weekDates = DateUtil.getWeekDates();
+    const today = DateUtil.todayKey();
+
+    const el = $('habitList');
+    if (!el) return;
+
+    const bestStreak = Store.state.habits.reduce((m, h) => Math.max(m, h.bestStreak || 0), 0);
+    const activeEl = $('habitActive');
+    const bsEl = $('habitBestStreak');
+    if (activeEl) activeEl.textContent = Store.state.habits.length;
+    if (bsEl) bsEl.textContent = bestStreak;
+
+    if (Store.state.habits.length === 0) {
+      el.innerHTML = `<div class="empty"><div class="empty-icon">🌿</div><div class="empty-text">Tambahkan habit pertamamu!</div></div>`;
+    } else {
+      el.innerHTML = Store.state.habits.map(h => {
+        return `<div class="habit-item">
+          <div class="habit-icon">${h.icon}</div>
+          <div class="habit-info">
+            <div class="habit-name">${h.name}</div>
+            <div class="habit-streak">Streak: <span>${h.streak || 0}</span> hari 🔥</div>
+          </div>
+          <div class="habit-days">
+            ${weekDates.map((date, i) => {
+              const done = h.completions[date];
+              const isToday = date === today;
+              return `<div class="day-dot ${done ? 'done' : ''} ${isToday ? 'today' : ''}" onclick="toggleHabitDay('${h.id}','${date}')" title="${date}">${DAYS[i]}</div>`;
+            }).join('')}
+          </div>
+          <div style="display:flex;gap:4px;margin-left:8px">
+            <div class="day-dot ${h.completions[today] ? 'done today' : 'today'}" onclick="toggleHabitDay('${h.id}','${today}')" style="width:auto;padding:0 12px;border-radius:20px">
+              ${h.completions[today] ? '✓ Done' : 'Cek'}
+            </div>
+            <button class="btn-icon" onclick="deleteHabit('${h.id}')" title="Hapus">🗑️</button>
+          </div>
+        </div>`;
+      }).join('');
+    }
+
+    this.renderHeatmap(weekDates);
+  },
+
+  renderHeatmap(weekDates) {
+    const hmEl = $('habitHeatmap');
+    if (!hmEl) return;
+    if (Store.state.habits.length === 0) { hmEl.innerHTML = ''; return; }
+
+    const headerDays = `<div class="heatmap-row">
+      <div style="width:80px;flex-shrink:0"></div>
+      <div class="heatmap-cells">${weekDates.map((d, i) => `<div style="width:24px;text-align:center;font-size:10px;color:var(--text3)">${DAYS[i]}</div>`).join('')}</div>
+    </div>`;
+
+    hmEl.innerHTML = headerDays + Store.state.habits.map(h => {
+      const cells = weekDates.map(date => {
+        const level = h.completions[date] ? 4 : 0;
+        return `<div class="heatmap-cell" data-level="${level}" title="${date}"></div>`;
+      }).join('');
+      return `<div class="heatmap-row">
+        <div class="heatmap-label">${h.icon} ${h.name}</div>
+        <div class="heatmap-cells">${cells}</div>
+      </div>`;
+    }).join('');
+  },
+};
+
+// ════════════════════════════════════════════════════════════
+//  GOAL MODULE — target mingguan & bulanan + progress slider
+// ════════════════════════════════════════════════════════════
+const GoalModule = {
+  add() {
+    const name = $('newGoalName').value.trim();
+    if (!name) { UI.toast('Nama goal wajib diisi!', 'error'); return; }
+
+    const goal = {
+      id: uid(),
+      name,
+      type: $('newGoalType').value,
+      progress: clampPercent($('newGoalProgress').value),
+      desc: $('newGoalDesc').value.trim(),
+      createdAt: DateUtil.todayKey(),
+    };
+
+    Store.update(state => { state.goals.unshift(goal); }, ['goals']);
+    UI.closeModal('addGoalModal');
+    $('newGoalName').value = '';
+    $('newGoalDesc').value = '';
+    $('newGoalProgress').value = 0;
+    UI.toast('Goal ditambahkan!');
+  },
+
+  updateProgress(id, val) {
+    Store.update(state => {
+      const g = state.goals.find(g => g.id === id);
+      if (g) g.progress = clampPercent(val);
+    }, ['goals']);
+  },
+
+  remove(id) {
+    Store.update(state => { state.goals = state.goals.filter(g => g.id !== id); }, ['goals']);
+    UI.toast('Goal dihapus', 'info');
+  },
+
+  render() {
+    const weekly = Store.state.goals.filter(g => g.type === 'weekly');
+    const monthly = Store.state.goals.filter(g => g.type === 'monthly');
+
+    const wEl = $('goalWeekly');
+    const mEl = $('goalMonthly');
+
+    if (wEl) {
+      wEl.innerHTML = weekly.length
+        ? weekly.map(g => Templates.goal(g)).join('')
+        : `<div class="empty"><div class="empty-icon">📅</div><div class="empty-text">Tambahkan target mingguan</div></div>`;
+    }
+
+    if (mEl) {
+      mEl.innerHTML = monthly.length
+        ? monthly.map(g => Templates.goal(g)).join('')
+        : `<div class="empty"><div class="empty-icon">🗓️</div><div class="empty-text">Tambahkan target bulanan</div></div>`;
+    }
+  },
+};
+
+// ════════════════════════════════════════════════════════════
+//  REFLECTION MODULE — catatan harian, mood, evaluasi diri
+// ════════════════════════════════════════════════════════════
+const ReflectionModule = {
+  selectedMood: '',
+  selectedScore: 0,
+
+  init() {
+    document.querySelectorAll('.mood-opt').forEach(el => {
+      el.addEventListener('click', () => {
+        document.querySelectorAll('.mood-opt').forEach(e => e.classList.remove('selected'));
+        el.classList.add('selected');
+        this.selectedMood = el.dataset.mood;
+      });
+    });
+
+    document.querySelectorAll('.score-btn').forEach(el => {
+      el.addEventListener('click', () => {
+        document.querySelectorAll('.score-btn').forEach(e => e.classList.remove('selected'));
+        el.classList.add('selected');
+        this.selectedScore = parseInt(el.dataset.score, 10);
+      });
+    });
+  },
+
+  save() {
+    const note = $('reflectionNote').value.trim();
+    if (!note) { UI.toast('Catatan harian wajib diisi!', 'error'); return; }
+
+    const reflection = {
+      id: uid(),
+      date: DateUtil.todayKey(),
+      mood: this.selectedMood || '-',
+      score: this.selectedScore || 0,
+      note,
+      grateful: [
+        $('grateful1').value.trim(),
+        $('grateful2').value.trim(),
+        $('grateful3').value.trim(),
+      ].filter(Boolean),
+    };
+
+    Store.update(state => { state.reflections.unshift(reflection); }, ['reflection']);
+
+    // Reset form
+    this.selectedMood = '';
+    this.selectedScore = 0;
+    $('reflectionNote').value = '';
+    $('grateful1').value = '';
+    $('grateful2').value = '';
+    $('grateful3').value = '';
+    document.querySelectorAll('.mood-opt').forEach(e => e.classList.remove('selected'));
+    document.querySelectorAll('.score-btn').forEach(e => e.classList.remove('selected'));
+
+    UI.toast('Refleksi disimpan! 🌟');
+  },
+
+  remove(id) {
+    Store.update(state => { state.reflections = state.reflections.filter(r => r.id !== id); }, ['reflection']);
+    UI.toast('Refleksi dihapus', 'info');
+  },
+
+  render() {
+    const el = $('reflectionHistory');
+    if (!el) return;
+
+    if (Store.state.reflections.length === 0) {
+      el.innerHTML = `<div class="empty"><div class="empty-icon">📖</div><div class="empty-text">Belum ada refleksi. Mulai tulis hari ini!</div></div>`;
+      return;
+    }
+
+    el.innerHTML = Store.state.reflections.slice(0, 20).map(r => {
+      const dateStr = DateUtil.formatLong(r.date);
+      const grateful = (r.grateful && r.grateful.length)
+        ? `<div style="margin-top:8px;padding:8px 10px;background:var(--surface3);border-radius:6px;font-size:12px;color:var(--text3)">🙏 ${r.grateful.join(' • ')}</div>`
+        : '';
+      const scoreEl = r.score ? `<span class="badge badge-blue">Skor: ${r.score}/10</span>` : '';
+      const moodEl = r.mood !== '-' ? `<span class="badge badge-yellow">${r.mood}</span>` : '';
+      return `<div class="reflection-item">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+          <div class="reflection-item-date">${dateStr}</div>
+          <button class="btn btn-danger btn-sm" onclick="deleteReflection('${r.id}')">🗑️</button>
+        </div>
+        <div class="flex-gap" style="margin-bottom:8px">${moodEl}${scoreEl}</div>
+        <div class="reflection-item-text">${r.note}</div>
+        ${grateful}
+      </div>`;
+    }).join('');
+  },
+};
+
+// ════════════════════════════════════════════════════════════
+//  DASHBOARD MODULE — agregasi tasks + habits + goals
+// ════════════════════════════════════════════════════════════
+const DashboardModule = {
+  render() {
+    const today = DateUtil.todayKey();
+    const { tasks, habits, goals } = Store.state;
+
+    // Statistik ringkas
+    const activeTasks = tasks.filter(t => !t.done).length;
+    const doneThisWeek = tasks.filter(t => t.done && t.weekKey === DateUtil.getWeekKey()).length;
+    const bestStreak = habits.reduce((m, h) => Math.max(m, h.bestStreak || 0), 0);
+
+    $('statTodayTasks').textContent = activeTasks;
+    $('statDone').textContent = doneThisWeek;
+    $('statStreak').textContent = bestStreak;
+
+    // Tugas mendatang (4 tugas belum selesai, urut deadline)
+    const upcoming = tasks.filter(t => !t.done).slice().sort((a, b) => {
+      if (!a.deadline) return 1;
+      if (!b.deadline) return -1;
+      return DateUtil.diffDays(a.deadline, b.deadline);
+    }).slice(0, 4);
+
+    const dashTasksEl = $('dashTasks');
+    if (dashTasksEl) {
+      dashTasksEl.innerHTML = upcoming.length
+        ? upcoming.map(t => Templates.task(t, true)).join('')
+        : `<div class="empty"><div class="empty-icon">🎉</div><div class="empty-text">Semua tugas selesai!</div></div>`;
+    }
+
+    // Habit hari ini
+    const dashHabitsEl = $('dashHabits');
+    const dashProgress = $('dashHabitProgress');
+    const dashBar = $('dashHabitBar');
+    const dashPct = $('dashHabitPct');
+
+    if (dashHabitsEl) {
+      if (habits.length === 0) {
+        dashHabitsEl.innerHTML = `<div class="empty"><div class="empty-icon">🌱</div><div class="empty-text">Tambahkan habit!</div></div>`;
+        if (dashProgress) dashProgress.style.display = 'none';
+      } else {
+        const doneCount = habits.filter(h => h.completions[today]).length;
+        const pct = Math.round((doneCount / habits.length) * 100);
+
+        dashHabitsEl.innerHTML = habits.slice(0, 4).map(h => {
+          const isDone = h.completions[today];
+          return `<div class="habit-item" style="margin-bottom:6px">
+            <div class="habit-icon">${h.icon}</div>
+            <div class="habit-info"><div class="habit-name">${h.name}</div></div>
+            <div class="day-dot ${isDone ? 'done today' : 'today'}" onclick="toggleHabitDay('${h.id}','${today}')" style="width:auto;padding:0 12px;border-radius:20px;flex-shrink:0">
+              ${isDone ? '✓' : 'Cek'}
+            </div>
+          </div>`;
+        }).join('');
+
+        if (dashProgress) dashProgress.style.display = 'block';
+        if (dashBar) dashBar.style.width = pct + '%';
+        if (dashPct) dashPct.textContent = pct + '%';
+      }
+    }
+
+    // Ringkasan goal
+    const dashGoalsEl = $('dashGoals');
+    if (dashGoalsEl) {
+      const goalsPreview = goals.slice(0, 4);
+      dashGoalsEl.innerHTML = goalsPreview.length ? goalsPreview.map(g => {
+        const color = g.progress === 100 ? 'var(--accent2)' : g.progress >= 50 ? 'var(--accent4)' : 'var(--accent3)';
+        return `<div style="margin-bottom:12px">
+          <div class="flex-between" style="margin-bottom:4px">
+            <div style="font-size:13px;font-weight:600">${g.name}</div>
+            <div style="font-size:12px;color:${color};font-weight:700">${g.progress}%</div>
+          </div>
+          <div class="progress-bar"><div class="progress-fill" style="width:${g.progress}%;background:${color}"></div></div>
+        </div>`;
+      }).join('') : `<div class="empty"><div class="empty-icon">🎯</div><div class="empty-text">Belum ada goal</div></div>`;
+    }
+  },
+};
+
+// ════════════════════════════════════════════════════════════
+//  SAMPLE DATA — hanya dimuat saat localStorage masih kosong
+// ════════════════════════════════════════════════════════════
+function loadSampleData() {
+  const today = DateUtil.todayKey();
+  const tomorrow = DateUtil.toKey(DateUtil.addDays(new Date(), 1));
+  const nextWeek = DateUtil.toKey(DateUtil.addDays(new Date(), 5));
+  const weekKey = DateUtil.getWeekKey();
+
+  Store.state.tasks = [
+    { id: uid(), name: 'Laporan Praktikum Kimia', subject: 'Kimia', priority: 'high', deadline: tomorrow, progress: 30, note: '', done: false, createdAt: today, weekKey },
+    { id: uid(), name: 'Baca Bab 7 Sejarah', subject: 'Sejarah', priority: 'medium', deadline: nextWeek, progress: 0, note: '', done: false, createdAt: today, weekKey },
+    { id: uid(), name: 'Latihan Soal Matematika', subject: 'Matematika', priority: 'high', deadline: today, progress: 70, note: '', done: false, createdAt: today, weekKey },
+    { id: uid(), name: 'Essay Bahasa Indonesia', subject: 'B. Indonesia', priority: 'medium', deadline: nextWeek, progress: 100, note: '', done: true, createdAt: today, weekKey },
+  ];
+
+  Store.state.habits = [
+    { id: uid(), name: 'Baca buku 30 menit', icon: '📚', category: 'belajar', completions: { [today]: true }, streak: 0, bestStreak: 7 },
+    { id: uid(), name: 'Olahraga pagi', icon: '🏃', category: 'kesehatan', completions: {}, streak: 0, bestStreak: 3 },
+    { id: uid(), name: 'Meditasi 10 menit', icon: '🧘', category: 'mindfulness', completions: { [today]: true }, streak: 0, bestStreak: 5 },
+  ];
+  Store.state.habits.forEach(h => HabitModule.recalcStreak(h));
+
+  Store.state.goals = [
+    { id: uid(), name: 'Selesaikan semua tugas minggu ini', type: 'weekly', progress: 60, desc: 'Targetkan semua deadline terpenuhi', createdAt: today },
+    { id: uid(), name: 'Nilai rata-rata di atas 85', type: 'monthly', progress: 40, desc: 'Fokus pada Matematika dan Fisika', createdAt: today },
+  ];
+
+  Store.persist();
+}
+
+// ════════════════════════════════════════════════════════════
+//  GLOBAL BRIDGE
+//  Atribut onclick/oninput pada HTML tetap memanggil nama fungsi
+//  global ini (tanpa perlu mengubah markup) — implementasinya
+//  didelegasikan ke modul-modul terkait di atas.
+// ════════════════════════════════════════════════════════════
+function navigate(el) { UI.navigate(el); }
+function toggleSidebar() { UI.toggleSidebar(); }
+function openModal(id) { UI.openModal(id); }
+function closeModal(id) { UI.closeModal(id); }
+
+function addTask() { TaskModule.add(); }
+function toggleTask(id) { TaskModule.toggle(id); }
+function deleteTask(id) { TaskModule.remove(id); }
+function editTask(id) { TaskModule.edit(id); }
+function saveEditTask() { TaskModule.saveEdit(); }
+function renderTasks() { TaskModule.render(); }
+
+function addHabit() { HabitModule.add(); }
+function toggleHabitDay(id, date) { HabitModule.toggleDay(id, date); }
+function deleteHabit(id) { HabitModule.remove(id); }
+function renderHabits() { HabitModule.render(); }
+
+function addGoal() { GoalModule.add(); }
+function updateGoalProgress(id, val) { GoalModule.updateProgress(id, val); }
+function deleteGoal(id) { GoalModule.remove(id); }
+function renderGoals() { GoalModule.render(); }
+
+function saveReflection() { ReflectionModule.save(); }
+function deleteReflection(id) { ReflectionModule.remove(id); }
+function renderReflection() { ReflectionModule.render(); }
+
+function renderDashboard() { DashboardModule.render(); }
+
+// ════════════════════════════════════════════════════════════
+//  BOOTSTRAP
+// ════════════════════════════════════════════════════════════
+Store.load();
+if (Store.state.tasks.length === 0 && Store.state.habits.length === 0) {
+  loadSampleData();
+}
+
+UI.initModalDismiss();
+UI.initDates();
+ReflectionModule.init();
+Renderer.renderCurrentPage();
+
+// Default deadline pada form tambah tugas: +7 hari dari hari ini
+const dlInput = $('newTaskDeadline');
+if (dlInput) {
+  dlInput.value = DateUtil.toKey(DateUtil.addDays(new Date(), 7));
+}
+</script>
+</body>
+</html>
