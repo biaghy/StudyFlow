@@ -54,7 +54,7 @@ Tasks:
 ![](assets/screenshots/tasks.jpg)
 
 Habit Tracker:
-![](assets/sreenshots/habits.jpg)
+![](assets/screenshots/habits.jpg)
 
 Goal Tracker:
 ![](assets/screenshots/goals.jpg)
